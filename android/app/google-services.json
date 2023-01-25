@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "42448997363",
+    "project_id": "login-with-b510f",
+    "storage_bucket": "login-with-b510f.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:42448997363:android:d21c731e2bbb1047c2e086",
+        "android_client_info": {
+          "package_name": "com.rodolfogiraldob.loginwithgoogle"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "42448997363-na678is9vkj34epsp0vun8kgvaiatpjm.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.rodolfogiraldob.loginwithgoogle",
+            "certificate_hash": "619789e2041307e326fe9837c74188bcac10ff3a"
+          }
+        },
+        {
+          "client_id": "42448997363-hmglock39ejtqrtqrper3uedu5fclgvs.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDftCmAxKncxsBv2Kk2FEdaakrVW0aX2Cs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "42448997363-hmglock39ejtqrtqrper3uedu5fclgvs.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
