@@ -1,26 +1,26 @@
-import 'dart:convert';
+import 'package:local_flutter_login_google/provider/provider_google_sign_in.dart';
 
+import '../model/student_model.dart';
+
+import 'package:googleapis/classroom/v1.dart';
 import 'package:googleapis/sheets/v4.dart';
 import 'package:local_flutter_login_google/helpers/google_sheet_helpers.dart';
+import 'package:local_flutter_login_google/model/courses_model.dart';
 
 import '../model/user_model.dart';
 import '../provider/google_sheet_data.dart';
-import '../provider/socket.dart';
 
 GoogleSheetService googleSheetService = GoogleSheetService(
-    googleSheetProvider: googleSheetProvider, socketProvider: socketProvider);
+    googleSheetProvider: googleSheetProvider);
 
 abstract class IGoogleSheetService {
   ///Create a user by obtaining their information
   ///Gets the last id of the spreadsheet to increment it by 1 and save the user with this id
   Future<bool> createUser(User infoUser);
 
-  ///Removes the user that corresponds to the selected id
-  Future<bool> deleteUser(String id, int index);
-
   ///Gets all the information of all the users in the spreadsheet.
   ///Clean the data in case any information arrives that is empty.
-  Future<List<User>?> getAllUser();
+  Future<List<Coursers>?> getAllCourses();
 
   ///Update some cells to a user
   Future<bool> updateCellUser(
@@ -31,10 +31,9 @@ abstract class IGoogleSheetService {
 
 class GoogleSheetService implements IGoogleSheetService {
   GoogleSheetService(
-      {required this.googleSheetProvider, required this.socketProvider});
+      {required this.googleSheetProvider});
 
   final IGoogleSheetProvider googleSheetProvider;
-  final SocketProvider socketProvider;
 
   @override
   Future<bool> createUser(User infoUser) async {
@@ -53,46 +52,35 @@ class GoogleSheetService implements IGoogleSheetService {
         ]
       ]
     });
-    Map data = {"msg": "Tabla modificada", "user": {}, "action": "create"};
-      String dataEnconde = jsonEncode(data);
-
-      final bool result = await googleSheetProvider.createUser(vr, infoUser);
-      if (result) socketProvider.emitMessage(dataEnconde);
-
-      return result;
-  }
-
-  @override
-  Future<bool> deleteUser(String id, int index) async {
-    Map data = {
-      "msg": "Tabla modificada",
-      "user": {"id": id, "index": index},
-      "action": "delete",
-      "columnsChanged": []
-    };
-    final bool result = await googleSheetProvider.deleteById(id, index);
-    if (result) socketProvider.emitMessage(jsonEncode(data));
+    final bool result = await googleSheetProvider.createUser(vr, infoUser);
     return result;
   }
 
   @override
-  Future<List<User>?> getAllUser() async {
-    ValueRange data = await googleSheetProvider.getAll();
+  Future<List<Coursers>?> getAllCourses() async {
+    ValueRange data = await googleSheetProvider.getAllCourses();
 
-    List<Map<String, dynamic>>? allUsers =
+    List<Map<String, dynamic>>? allCourses =
         GoogleSheetHelpers.getDataFormated(data);
 
-    final cleanUsers = allUsers
-        .map((user) => User.fromJsontwo(user, allUsers.indexOf(user)))
-        .where((user) => user.id != "")
+    final cleanCourses = allCourses
+        .map((course) => Coursers.fromJsontwo(course, allCourses.indexOf(course)))
+        .where((course) => course.id != "")
         .toList();
+    return cleanCourses;
+  }
 
-    for (var user in cleanUsers) {
-      user.comments.removeWhere((element) => element.isEmpty);
-    }
-    googleSheetProvider.getRowCount();
 
-    return cleanUsers;
+  @override
+  Future<StudentModel> getUsers() async {
+    ValueRange dataUsers  = await googleSheetProvider.getUsers();
+    String filterEmail = googleSignInProvider.googleSignIn.currentUser!.email;
+    List<Map<String,dynamic>> formatData =  GoogleSheetHelpers.getDataFormated(dataUsers);
+    List<StudentModel> cleanStudent = formatData
+        .map((student) => StudentModel.fromJsontwo(student, formatData.indexOf(student)))
+        .where((student) => student.email == filterEmail )
+        .toList();
+    return cleanStudent.isNotEmpty ? cleanStudent[0]: StudentModel();
   }
 
   @override
@@ -124,10 +112,6 @@ class GoogleSheetService implements IGoogleSheetService {
 
         String? range = "${UserFieldsGoogleSheet.getLettersColumns(element)}$indexRow";
         result = await googleSheetProvider.updateCellUser(id, keys, vr, range);
-    }
-
-    if (result) {
-      socketProvider.emitMessage(jsonEncode(data));
     }
     return true;
   }

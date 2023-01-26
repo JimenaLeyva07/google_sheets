@@ -36,7 +36,7 @@ class _CreateUserScreenState extends State<CreateUserScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Create User'),
+        title: const Text('Listado de Cursos'),
         leading: IconButton(
           icon: const Icon(Icons.home),
           onPressed: () {

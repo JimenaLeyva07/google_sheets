@@ -7,7 +7,6 @@ import 'package:local_flutter_login_google/provider/provider_google_sign_in.dart
 import 'package:local_flutter_login_google/service/google_sheet_service.dart';
 import 'package:local_flutter_login_google/service/service_google_sign_in.dart';
 import 'package:local_flutter_login_google/service/shared_preferences_service.dart';
-import 'package:local_flutter_login_google/service/socket_service.dart';
 import 'package:local_flutter_login_google/ui/my_home_page.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 
@@ -42,20 +41,6 @@ class _MyAppState extends State<MyApp> {
     super.initState();
     initPreferences();
     initConnectivity();
-    _connectivitySubscription = Connectivity().onConnectivityChanged.listen(
-      (ConnectivityResult result) {
-        if (result != ConnectivityResult.none) {
-          if (!isFirstEjecutation) {
-            // socketUtils.closeSocket();
-            socketService.init();
-          }
-          isFirstEjecutation = false;
-        } else {
-          isFirstEjecutation = false;
-        }
-      },
-    );
-    socketService.init();
   }
 
   initPreferences() async {

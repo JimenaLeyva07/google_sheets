@@ -1,47 +1,49 @@
 import 'dart:async';
 
+import 'package:local_flutter_login_google/model/courses_model.dart';
+
 import '../model/user_model.dart';
 import '../service/google_sheet_service.dart';
 import '../service/shared_preferences_service.dart';
-import '../service/socket_service.dart';
 
 GoogleSheetBloc googleSheetBloc = GoogleSheetBloc(
     googleSheetService: googleSheetService,
-    socketService: socketService,
     sharedPreferencesService: sharedPreferencesService);
 
 /// Class for getting and deleting users in a user list
 class GoogleSheetBloc {
   GoogleSheetBloc(
       {required this.sharedPreferencesService,
-      required this.googleSheetService,
-      required this.socketService});
+      required this.googleSheetService,});
 
   final GoogleSheetService googleSheetService;
-  final SocketService socketService;
   final SharedPreferencesService sharedPreferencesService;
+  List<String> listCoursesAdd=[]; 
 
-  /// Stream for control the list of users
-  final _controllerListUser = StreamController<List<User>>.broadcast();
-  Stream<List<User>> get streamListUser => _controllerListUser.stream;
+  final _controllerListCourse = StreamController<List<Coursers>>.broadcast();
+  Stream<List<Coursers>> get streamListCourse => _controllerListCourse.stream;
 
-  /// Stream for control when user was deleted
-  final _controllerDeleteUser = StreamController<bool>();
-  Stream<bool> get streamDeleteUser => _controllerDeleteUser.stream;
 
   ///Function for getting all users
-  Future<void> getAllUsers() async {
-    List<User>? listUsers = await googleSheetService.getAllUser();
-    _controllerListUser.add(listUsers!);
+  Future<void> getAllCourses() async {
+    List<Coursers>? listCourses = await googleSheetService.getAllCourses();
+    _controllerListCourse.add(listCourses!);    
   }
 
-  ///Function for delete a user of user list
-  Future<void> deleteUser(String id, int indexRow) async {
-    bool wasUserDelete = await googleSheetService.deleteUser(id, indexRow);
-    _controllerDeleteUser.add(wasUserDelete);
+  ///Function for getting all users
+  Future<void> saveListCourses(String course) async {
+
+    if(listCoursesAdd.contains(course)){
+       listCoursesAdd.remove(course);
+    }else{
+      listCoursesAdd.add(course);
+    }
   }
 
-  Stream<Map> get socketStream => socketService.socketStream;
+
+  void saveCoursesGsheets() {
+    print(listCoursesAdd);
+  }
 
   void saveUserInfo(String key, String value) {
     sharedPreferencesService.setString(key, value);
