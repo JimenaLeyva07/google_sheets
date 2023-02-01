@@ -19,7 +19,9 @@ class GoogleSheetBloc {
   final SharedPreferencesService sharedPreferencesService;
   List<String> listCoursesAdd = [];
   List<String> courseList = [];
+  Map<String, dynamic> originalCheckedCourses = {};
   List<int> checkedCourses = [];
+  List<int> uncheckedList = [];
   String columnLabel = '';
 
   final _controllerListCourse = StreamController<List<String>>.broadcast();
@@ -41,13 +43,21 @@ class GoogleSheetBloc {
   Future<void> saveListCourses(int index) async {
     if (checkedCourses.contains(index)) {
       checkedCourses.remove(index);
+      uncheckedList.add(index);
     } else {
       checkedCourses.add(index);
+      if (uncheckedList.contains(index)) {
+        uncheckedList.remove(index);
+      }
     }
   }
 
-  void saveCoursesGsheets() {
-    print(listCoursesAdd);
+  Future<void> saveCoursesGsheets() async {
+    bool response = await googleSheetService.updateCellUser(
+        checkedCourses, uncheckedList, columnLabel);
+    if (response) {
+      uncheckedList = [];
+    }
   }
 
   void saveUserInfo(String key, String value) {

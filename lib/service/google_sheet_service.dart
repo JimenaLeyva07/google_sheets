@@ -24,7 +24,7 @@ abstract class IGoogleSheetService {
 
   ///Update some cells to a user
   Future<bool> updateCellUser(
-      String id, List<String> keys, List<String> newValues, int indexRow);
+      List<int> index, List<int> uncheckedList, String columnUpdate);
 
   Future<void> init();
 }
@@ -56,6 +56,7 @@ class GoogleSheetService implements IGoogleSheetService {
 
     Map<String, dynamic> mapData = data.toJson();
     List<List<String>> rows = [];
+    String columnLabel = "";
 
     for (var element in mapData["values"]) {
       rows.add(List<String>.from(element));
@@ -68,12 +69,11 @@ class GoogleSheetService implements IGoogleSheetService {
         rows.indexWhere((element) => element.contains(userEmail));
     print(indexUser);
 
-    String columnLabel = getColumnLabel(rows.length + 1);
-
     if (indexUser == -1) {
-      columnLabel = "${columnLabel}1";
+      columnLabel = "${getColumnLabel(rows.length + 1)}1";
       createUser(userEmail, columnLabel);
     } else {
+      columnLabel = getColumnLabel(indexUser + 1);
       listColumn = List<String>.from(mapData["values"][indexUser]);
       for (var i = 1; i < listColumn.length; i++) {
         if (listColumn[i] == 'X') {
@@ -94,35 +94,34 @@ class GoogleSheetService implements IGoogleSheetService {
   }
 
   @override
-  Future<bool> updateCellUser(String id, List<String> keys,
-      List<String> newValues, int indexRow) async {
-    if (keys.isEmpty) {
-      return true;
+  Future<bool> updateCellUser(List<int> checkedIndex, List<int> uncheckedIndex,
+      String columnUpdate) async {
+    List<DataFilterValueRange> dataToSend = [];
+
+    for (var element in checkedIndex) {
+      DataFilterValueRange vr = DataFilterValueRange(
+          dataFilter: DataFilter(a1Range: "CourseUsers!$columnUpdate$element"),
+          values: [
+            ["X"]
+          ]);
+      dataToSend.add(vr);
+    }
+    for (var element in uncheckedIndex) {
+      DataFilterValueRange vr = DataFilterValueRange(
+          dataFilter: DataFilter(a1Range: "CourseUsers!$columnUpdate$element"),
+          values: [
+            [""]
+          ]);
+      dataToSend.add(vr);
     }
 
-    Map data = {
-      "msg": "Tabla modificada",
-      "user": {
-        "id": id,
-        "index": indexRow,
-      },
-      "action": "update",
-      "columnsChanged": keys
-    };
-    ValueRange vr;
-    bool result = false;
-    for (var element in keys) {
-      vr = ValueRange.fromJson({
-        "values": [
-          [newValues[keys.indexOf(element)]]
-        ]
-      });
+    BatchUpdateValuesByDataFilterRequest sendToProvider =
+        BatchUpdateValuesByDataFilterRequest(
+            data: dataToSend, valueInputOption: 'USER_ENTERED');
 
-      String? range =
-          "${UserFieldsGoogleSheet.getLettersColumns(element)}$indexRow";
-      result = await googleSheetProvider.updateCellUser(id, keys, vr, range);
-    }
-    return true;
+    bool result = await googleSheetProvider.updateCellUser(sendToProvider);
+    print(result);
+    return result;
   }
 
   int sum(int? i) {

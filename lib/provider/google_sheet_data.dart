@@ -17,8 +17,7 @@ abstract class IGoogleSheetProvider {
   Future<ValueRange> getUsers();
   Future<bool> updateUser(
       int indexRow, Map<String, dynamic> user, List<String> columnsChanged);
-  Future<bool> updateCellUser(
-      String id, List<String> keyUpdate, ValueRange newValue, String indexRow);
+  Future<bool> updateCellUser(BatchUpdateValuesByDataFilterRequest newValue);
 }
 
 class GoogleApiSheetProvider implements IGoogleSheetProvider {
@@ -85,13 +84,13 @@ class GoogleApiSheetProvider implements IGoogleSheetProvider {
   }
 
   @override
-  Future<bool> updateCellUser(String id, List<String> keyUpdate,
-      ValueRange newValue, String indexRow) async {
+  Future<bool> updateCellUser(
+      BatchUpdateValuesByDataFilterRequest newValue) async {
     if (sheetApi == null) return false;
 
     try {
-      sheetApi!.spreadsheets.values.update(newValue, spreadsheetId, indexRow,
-          valueInputOption: 'USER_ENTERED');
+      sheetApi!.spreadsheets.values
+          .batchUpdateByDataFilter(newValue, spreadsheetId);
       return true;
     } catch (e) {
       return false;
