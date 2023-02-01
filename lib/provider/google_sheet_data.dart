@@ -11,7 +11,7 @@ GoogleApiSheetProvider googleSheetProvider =
 
 abstract class IGoogleSheetProvider {
   Future init();
-  Future<bool> createUser(ValueRange rowList, User infoUser);
+  Future<bool> createUser(ValueRange rowList, String range);
   Future<int> getRowCount();
   Future<ValueRange> getAllCourses();
   Future<ValueRange> getUsers();
@@ -46,32 +46,33 @@ class GoogleApiSheetProvider implements IGoogleSheetProvider {
   Future<ValueRange> getAllCourses() async {
     if (sheetApi == null) return ValueRange();
     // Ver todos los datos
-    final data = await sheetApi!.spreadsheets.values.get(spreadsheetId, "Courses!A:D");
+    final data = await sheetApi!.spreadsheets.values
+        .get(spreadsheetId, "CourseUsers", majorDimension: "COLUMNS");
     return data;
   }
 
   @override
   Future<ValueRange> getUsers() async {
     if (sheetApi == null) return ValueRange();
-    final dataUsers = await sheetApi!.spreadsheets.values.get(spreadsheetId, "StudentProgress!A:D");
+    final dataUsers = await sheetApi!.spreadsheets.values
+        .get(spreadsheetId, "StudentProgress!A:D");
     return dataUsers;
   }
 
   @override
-  Future<bool> createUser(ValueRange rowList, User infoUser) async {
+  Future<bool> createUser(ValueRange rowList, String range) async {
     if (sheetApi == null) return false;
-    if (infoUser.id == '') return false;
 
-     try {
+    try {
       //Agrego datos
-      sheetApi?.spreadsheets.values
-        .append(rowList, spreadsheetId, 'Users', valueInputOption: 'USER_ENTERED');
-       return true;
-     } catch (e) {
-       return false;
-     }
+      sheetApi?.spreadsheets.values.append(
+          rowList, spreadsheetId, 'CourseUsers!$range',
+          valueInputOption: 'USER_ENTERED');
+      return true;
+    } catch (e) {
+      return false;
+    }
   }
-  
 
   @override
   Future<int> getRowCount() async {
@@ -86,15 +87,15 @@ class GoogleApiSheetProvider implements IGoogleSheetProvider {
   @override
   Future<bool> updateCellUser(String id, List<String> keyUpdate,
       ValueRange newValue, String indexRow) async {
+    if (sheetApi == null) return false;
 
-      if (sheetApi == null) return false;  
-
-      try {
-        sheetApi!.spreadsheets.values.update(newValue, spreadsheetId, indexRow, valueInputOption: 'USER_ENTERED');
-        return true;
-      } catch (e) {
-        return false;
-      }
+    try {
+      sheetApi!.spreadsheets.values.update(newValue, spreadsheetId, indexRow,
+          valueInputOption: 'USER_ENTERED');
+      return true;
+    } catch (e) {
+      return false;
+    }
   }
 
   //No se implementa de momento

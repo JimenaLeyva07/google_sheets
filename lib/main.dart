@@ -10,9 +10,7 @@ import 'package:local_flutter_login_google/service/shared_preferences_service.da
 import 'package:local_flutter_login_google/ui/my_home_page.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 
-import 'bloc/create_google_sheet_bloc.dart';
 import 'bloc/google_sheet_bloc.dart';
-import 'bloc/update_google_sheet_bloc.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -73,8 +71,6 @@ class _MyAppState extends State<MyApp> {
       googleSheetService: googleSheetService,
       googleSheetProvider: googleSignInProvider,
       googleSheetBloc: googleSheetBloc,
-      createGoogleSheetBloc: createGoogleSheetBloc,
-      updateGoogleSheetBloc: updateGoogleSheetBloc,
       child: MaterialApp(
         title: 'Flutter Demo',
         theme: ThemeData(
@@ -89,11 +85,9 @@ class _MyAppState extends State<MyApp> {
 class MyInheritedWidget extends InheritedWidget {
   const MyInheritedWidget({
     required this.googleSignInBloc,
-    required this.createGoogleSheetBloc,
     required this.googleSheetBloc,
     required this.googleSheetProvider,
     required this.googleSheetService,
-    required this.updateGoogleSheetBloc,
     required Widget child,
     Key? key,
   }) : super(child: child, key: key);
@@ -102,8 +96,6 @@ class MyInheritedWidget extends InheritedWidget {
   final GoogleSheetService googleSheetService;
   final GoogleSignInProvider googleSheetProvider;
   final GoogleSheetBloc googleSheetBloc;
-  final CreateGoogleSheetBloc createGoogleSheetBloc;
-  final UpdateGoogleSheetBloc updateGoogleSheetBloc;
 
   static MyInheritedWidget of(BuildContext context) =>
       context.findAncestorWidgetOfExactType<MyInheritedWidget>()!;
