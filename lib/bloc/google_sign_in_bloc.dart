@@ -25,7 +25,7 @@ class GoogleSignInBloc {
   void handleSignIn() async {
     try {
       await googleSignInService.handleSignIn();
-      initGoogleApis();      
+      initGoogleApis();
     } catch (e) {
       throw "$e";
     }
@@ -33,7 +33,6 @@ class GoogleSignInBloc {
 
   void initGoogleApis() async {
     await googleSheetService.init();
-    await googleSheetService.getUsers();
   }
 
   void handleSignOut() {

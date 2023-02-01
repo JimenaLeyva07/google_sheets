@@ -27,20 +27,13 @@ class GoogleSheetHelpers {
       list.length > at ? list[at] : or;
 
   static List<Map<String, String>> getDataFormated(
-    ValueRange getData, {
+    List<List<String>> rows, {
     int fromRow = 1,
     int fromColumn = 1,
     int length = -1,
     int count = -1,
     int mapTo = 1,
   }) {
-    Map<String, dynamic> mapData = getData.toJson();
-    List<List<String>> rows = [];
-
-    for (var element in mapData["values"]) {
-      rows.add(List<String>.from(element));
-    }
-
     final maps = <Map<String, String>>[];
     final keys = rows.first;
     final start = min(fromRow - 1, rows.length);

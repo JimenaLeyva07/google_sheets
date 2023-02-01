@@ -5,7 +5,6 @@ import '../model/student_model.dart';
 import 'package:googleapis/classroom/v1.dart';
 import 'package:googleapis/sheets/v4.dart';
 import 'package:local_flutter_login_google/helpers/google_sheet_helpers.dart';
-import 'package:local_flutter_login_google/model/courses_model.dart';
 
 import '../model/user_model.dart';
 import '../provider/google_sheet_data.dart';
@@ -21,7 +20,7 @@ abstract class IGoogleSheetService {
 
   ///Gets all the information of all the users in the spreadsheet.
   ///Clean the data in case any information arrives that is empty.
-  Future<List<Coursers>?> getAllCourses();
+  Future<List<String>?> getAllCourses();
 
   ///Update some cells to a user
   Future<bool> updateCellUser(
@@ -49,45 +48,33 @@ class GoogleSheetService implements IGoogleSheetService {
   }
 
   @override
-  Future<List<Coursers>?> getAllCourses() async {
+  Future<List<String>?> getAllCourses() async {
     String userEmail = googleSignInService.getGoogleSignIn.currentUser!.email;
     ValueRange data = await googleSheetProvider.getAllCourses();
-
-    List<Map<String, dynamic>>? allCourses =
-        GoogleSheetHelpers.getDataFormated(data);
-
-    final cleanCourses = allCourses
-        .map((course) =>
-            Coursers.fromJsontwo(course, allCourses.indexOf(course)))
-        .where((course) => course.id != "")
-        .toList();
+    List<String> listColumn = [];
 
     Map<String, dynamic> mapData = data.toJson();
+    List<List<String>> rows = [];
+
+    for (var element in mapData["values"]) {
+      rows.add(List<String>.from(element));
+    }
+
+    List<Map<String, dynamic>>? allCourses =
+        GoogleSheetHelpers.getDataFormated(rows);
+
     final int indexUser =
-        mapData["values"].indexWhere((element) => element.contains(userEmail));
+        rows.indexWhere((element) => element.contains(userEmail));
     print(indexUser);
 
-    List<String> rows = List<String>.from(mapData["values"].length);
     if (indexUser == -1) {
-      String columnLabel = "${getColumnLabel(mapData["values"].length + 1)}1";
+      String columnLabel = "${getColumnLabel(rows.length + 1)}1";
       createUser(userEmail, columnLabel);
+    } else {
+      listColumn = List<String>.from(mapData["values"][indexUser]);
+      print(listColumn);
     }
-    print("a");
-    return cleanCourses;
-  }
-
-  @override
-  Future<StudentModel> getUsers() async {
-    ValueRange dataUsers = await googleSheetProvider.getUsers();
-    String filterEmail = googleSignInProvider.googleSignIn.currentUser!.email;
-    List<Map<String, dynamic>> formatData =
-        GoogleSheetHelpers.getDataFormated(dataUsers);
-    List<StudentModel> cleanStudent = formatData
-        .map((student) =>
-            StudentModel.fromJsontwo(student, formatData.indexOf(student)))
-        .where((student) => student.email == filterEmail)
-        .toList();
-    return cleanStudent.isNotEmpty ? cleanStudent[0] : StudentModel();
+    return rows[0];
   }
 
   @override

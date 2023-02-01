@@ -1,7 +1,4 @@
-
-
 import 'package:flutter/material.dart';
-import 'package:local_flutter_login_google/model/courses_model.dart';
 
 import '../../bloc/google_sheet_bloc.dart';
 import '../../main.dart';
@@ -37,16 +34,18 @@ class _ShowUsersGoogleSheetScreenState
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           GestureDetector(
-            onTap: () {googleSheetBloc.saveCoursesGsheets();},
+            onTap: () {
+              googleSheetBloc.saveCoursesGsheets();
+            },
             child: Container(
               width: MediaQuery.of(context).size.width,
               color: Colors.white,
               child: Container(
                 margin: const EdgeInsets.symmetric(
-                horizontal: 35.0, vertical: 10.0),
+                    horizontal: 35.0, vertical: 10.0),
                 padding: const EdgeInsets.symmetric(vertical: 10.0),
                 decoration: const BoxDecoration(
-                  color: Colors.green,                  
+                  color: Colors.green,
                 ),
                 child: const Center(child: Text('Guardar')),
               ),
@@ -54,9 +53,9 @@ class _ShowUsersGoogleSheetScreenState
           ),
           StreamBuilder(
             stream: googleSheetBloc.streamListCourse,
-            builder: ((context, AsyncSnapshot<List<Coursers>> snapshot) {
+            builder: ((context, AsyncSnapshot<List<String>> snapshot) {
               if (snapshot.hasData) {
-                final List<Coursers> data = snapshot.data ?? [];
+                final List<String> data = snapshot.data ?? [];
                 if (data.isEmpty) {
                   return const Text(
                       'Actualmente no tiene datos la hoja de excel');
@@ -65,9 +64,8 @@ class _ShowUsersGoogleSheetScreenState
                   child: ListView.builder(
                       itemCount: data.length,
                       itemBuilder: (context, index) {
-                        return CoursesCustomItem(                            
-                            course: data[index],
-                            index: data[index].indexRow!,);
+                        return CoursesCustomItem(
+                            course: data[index], index: index);
                       }),
                 );
               }
