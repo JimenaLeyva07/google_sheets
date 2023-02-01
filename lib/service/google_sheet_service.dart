@@ -20,7 +20,7 @@ abstract class IGoogleSheetService {
 
   ///Gets all the information of all the users in the spreadsheet.
   ///Clean the data in case any information arrives that is empty.
-  Future<List<String>?> getAllCourses();
+  Future<Map<String, dynamic>?> getAllCourses();
 
   ///Update some cells to a user
   Future<bool> updateCellUser(
@@ -48,10 +48,11 @@ class GoogleSheetService implements IGoogleSheetService {
   }
 
   @override
-  Future<List<String>?> getAllCourses() async {
+  Future<Map<String, dynamic>?> getAllCourses() async {
     String userEmail = googleSignInService.getGoogleSignIn.currentUser!.email;
     ValueRange data = await googleSheetProvider.getAllCourses();
     List<String> listColumn = [];
+    List<int> checkedCourses = [];
 
     Map<String, dynamic> mapData = data.toJson();
     List<List<String>> rows = [];
@@ -67,14 +68,29 @@ class GoogleSheetService implements IGoogleSheetService {
         rows.indexWhere((element) => element.contains(userEmail));
     print(indexUser);
 
+    String columnLabel = getColumnLabel(rows.length + 1);
+
     if (indexUser == -1) {
-      String columnLabel = "${getColumnLabel(rows.length + 1)}1";
+      columnLabel = "${columnLabel}1";
       createUser(userEmail, columnLabel);
     } else {
       listColumn = List<String>.from(mapData["values"][indexUser]);
-      print(listColumn);
+      for (var i = 1; i < listColumn.length; i++) {
+        if (listColumn[i] == 'X') {
+          checkedCourses.add(i + 1);
+        }
+      }
     }
-    return rows[0];
+
+    rows[0].removeAt(0);
+
+    Map<String, dynamic> generalInfo = {
+      'courseList': rows[0],
+      'checkedCourses': checkedCourses,
+      'columnLabel': columnLabel
+    };
+    print(listColumn);
+    return generalInfo;
   }
 
   @override

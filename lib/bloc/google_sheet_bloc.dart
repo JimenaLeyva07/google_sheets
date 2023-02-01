@@ -18,22 +18,31 @@ class GoogleSheetBloc {
   final GoogleSheetService googleSheetService;
   final SharedPreferencesService sharedPreferencesService;
   List<String> listCoursesAdd = [];
+  List<String> courseList = [];
+  List<int> checkedCourses = [];
+  String columnLabel = '';
 
   final _controllerListCourse = StreamController<List<String>>.broadcast();
   Stream<List<String>> get streamListCourse => _controllerListCourse.stream;
 
   ///Function for getting all users
   Future<void> getAllCourses() async {
-    List<String>? listCourses = await googleSheetService.getAllCourses();
-    _controllerListCourse.add(listCourses!);
+    Map<String, dynamic>? generalInfo =
+        await googleSheetService.getAllCourses();
+
+    courseList = generalInfo!['courseList'];
+    checkedCourses = generalInfo['checkedCourses'];
+    columnLabel = generalInfo['columnLabel'];
+
+    _controllerListCourse.add(courseList);
   }
 
   ///Function for getting all users
-  Future<void> saveListCourses(String course) async {
-    if (listCoursesAdd.contains(course)) {
-      listCoursesAdd.remove(course);
+  Future<void> saveListCourses(int index) async {
+    if (checkedCourses.contains(index)) {
+      checkedCourses.remove(index);
     } else {
-      listCoursesAdd.add(course);
+      checkedCourses.add(index);
     }
   }
 
@@ -43,5 +52,9 @@ class GoogleSheetBloc {
 
   void saveUserInfo(String key, String value) {
     sharedPreferencesService.setString(key, value);
+  }
+
+  bool checkCourse(int index) {
+    return checkedCourses.contains(index);
   }
 }

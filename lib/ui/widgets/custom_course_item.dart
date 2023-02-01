@@ -38,10 +38,10 @@ class _CoursesCustomItemState extends State<CoursesCustomItem> {
         crossAxisAlignment: CrossAxisAlignment.end,
         children: <Widget>[
           Checkbox(
-              value: isChecked,
+              value: googleSheetBloc.checkCourse(widget.index),
               onChanged: (bool? value) {
                 isChecked = value!;
-                googleSheetBloc.saveListCourses(widget.course);
+                googleSheetBloc.saveListCourses(widget.index);
                 setState(() {});
               })
         ],

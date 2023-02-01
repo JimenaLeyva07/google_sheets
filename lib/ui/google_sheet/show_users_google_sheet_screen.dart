@@ -65,7 +65,7 @@ class _ShowUsersGoogleSheetScreenState
                       itemCount: data.length,
                       itemBuilder: (context, index) {
                         return CoursesCustomItem(
-                            course: data[index], index: index);
+                            course: data[index], index: index + 2);
                       }),
                 );
               }
