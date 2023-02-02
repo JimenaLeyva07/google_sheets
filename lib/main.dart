@@ -6,15 +6,16 @@ import 'package:local_flutter_login_google/bloc/google_sign_in_bloc.dart';
 import 'package:local_flutter_login_google/provider/provider_google_sign_in.dart';
 import 'package:local_flutter_login_google/service/google_sheet_service.dart';
 import 'package:local_flutter_login_google/service/service_google_sign_in.dart';
-import 'package:local_flutter_login_google/service/shared_preferences_service.dart';
 import 'package:local_flutter_login_google/ui/my_home_page.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 
 import 'bloc/google_sheet_bloc.dart';
+import 'helpers/local_storage_preferences.dart';
 
-void main() {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
+  final pref = LocalStoragePreferences();
+  await pref.initPrefs();
   runApp(const MyApp());
 }
 
@@ -37,12 +38,7 @@ class _MyAppState extends State<MyApp> {
   @override
   void initState() {
     super.initState();
-    initPreferences();
     initConnectivity();
-  }
-
-  initPreferences() async {
-    await sharedPreferencesService.initPreferences();
   }
 
   @override

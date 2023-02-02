@@ -1,4 +1,3 @@
-import '../model/user_model.dart';
 import 'package:local_flutter_login_google/service/service_google_sign_in.dart';
 
 import 'package:google_sign_in/google_sign_in.dart';
@@ -11,7 +10,7 @@ GoogleApiSheetProvider googleSheetProvider =
 
 abstract class IGoogleSheetProvider {
   Future init();
-  Future<bool> createUser(ValueRange rowList, String range);
+  Future<bool> addUserEmail(ValueRange vr, String columnLabel);
   Future<int> getRowCount();
   Future<ValueRange> getAllCourses();
   Future<ValueRange> getUsers();
@@ -59,13 +58,13 @@ class GoogleApiSheetProvider implements IGoogleSheetProvider {
   }
 
   @override
-  Future<bool> createUser(ValueRange rowList, String range) async {
+  Future<bool> addUserEmail(ValueRange vr, String columnLabel) async {
     if (sheetApi == null) return false;
 
     try {
       //Agrego datos
       sheetApi?.spreadsheets.values.append(
-          rowList, spreadsheetId, 'CourseUsers!$range',
+          vr, spreadsheetId, 'CourseUsers!$columnLabel',
           valueInputOption: 'USER_ENTERED');
       return true;
     } catch (e) {

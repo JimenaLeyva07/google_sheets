@@ -1,12 +1,7 @@
-import 'package:local_flutter_login_google/provider/provider_google_sign_in.dart';
-
-import '../model/student_model.dart';
-
-import 'package:googleapis/classroom/v1.dart';
 import 'package:googleapis/sheets/v4.dart';
 import 'package:local_flutter_login_google/helpers/google_sheet_helpers.dart';
 
-import '../model/user_model.dart';
+import '../helpers/local_storage_preferences.dart';
 import '../provider/google_sheet_data.dart';
 import 'service_google_sign_in.dart';
 
@@ -16,15 +11,14 @@ GoogleSheetService googleSheetService =
 abstract class IGoogleSheetService {
   ///Create a user by obtaining their information
   ///Gets the last id of the spreadsheet to increment it by 1 and save the user with this id
-  Future<bool> createUser(String email, String label);
+  Future<bool> addUserEmail(String email, String label);
 
   ///Gets all the information of all the users in the spreadsheet.
   ///Clean the data in case any information arrives that is empty.
-  Future<Map<String, dynamic>?> getAllCourses();
+  Future<Map<String, dynamic>?> getAllSheetData();
 
-  ///Update some cells to a user
-  Future<bool> updateCellUser(
-      List<int> index, List<int> uncheckedList, String columnUpdate);
+  Future<bool> updateCoursesbyUser(List<int> checkedCoursesRowIndex,
+      List<int> uncheckedCoursesRowIndex, String columnLabelToUpdate);
 
   Future<void> init();
 }
@@ -33,23 +27,25 @@ class GoogleSheetService implements IGoogleSheetService {
   GoogleSheetService({required this.googleSheetProvider});
 
   final IGoogleSheetProvider googleSheetProvider;
+  final LocalStoragePreferences _prefs = LocalStoragePreferences();
 
   final int _charCodeUnitA = 'A'.codeUnitAt(0);
 
   @override
-  Future<bool> createUser(String email, String label) async {
+  Future<bool> addUserEmail(String email, String columnLabel) async {
     ValueRange vr = ValueRange.fromJson({
       "values": [
         [email]
       ]
     });
-    final bool result = await googleSheetProvider.createUser(vr, label);
+    final bool result = await googleSheetProvider.addUserEmail(vr, columnLabel);
     return result;
   }
 
   @override
-  Future<Map<String, dynamic>?> getAllCourses() async {
-    String userEmail = googleSignInService.getGoogleSignIn.currentUser!.email;
+  Future<Map<String, dynamic>?> getAllSheetData() async {
+    //String userEmail = googleSignInService.getGoogleSignIn.currentUser!.email;
+    String userEmail = _prefs.userEmail;
     ValueRange data = await googleSheetProvider.getAllCourses();
     List<String> listColumn = [];
     List<int> checkedCourses = [];
@@ -71,7 +67,7 @@ class GoogleSheetService implements IGoogleSheetService {
 
     if (indexUser == -1) {
       columnLabel = "${getColumnLabel(rows.length + 1)}1";
-      createUser(userEmail, columnLabel);
+      addUserEmail(userEmail, columnLabel);
     } else {
       columnLabel = getColumnLabel(indexUser + 1);
       listColumn = List<String>.from(mapData["values"][indexUser]);
@@ -89,26 +85,27 @@ class GoogleSheetService implements IGoogleSheetService {
       'checkedCourses': checkedCourses,
       'columnLabel': columnLabel
     };
-    print(listColumn);
     return generalInfo;
   }
 
   @override
-  Future<bool> updateCellUser(List<int> checkedIndex, List<int> uncheckedIndex,
-      String columnUpdate) async {
+  Future<bool> updateCoursesbyUser(List<int> checkedCoursesRowIndex,
+      List<int> uncheckedCoursesRowIndex, String columnLabelToUpdate) async {
     List<DataFilterValueRange> dataToSend = [];
 
-    for (var element in checkedIndex) {
+    for (var element in checkedCoursesRowIndex) {
       DataFilterValueRange vr = DataFilterValueRange(
-          dataFilter: DataFilter(a1Range: "CourseUsers!$columnUpdate$element"),
+          dataFilter:
+              DataFilter(a1Range: "CourseUsers!$columnLabelToUpdate$element"),
           values: [
             ["X"]
           ]);
       dataToSend.add(vr);
     }
-    for (var element in uncheckedIndex) {
+    for (var element in uncheckedCoursesRowIndex) {
       DataFilterValueRange vr = DataFilterValueRange(
-          dataFilter: DataFilter(a1Range: "CourseUsers!$columnUpdate$element"),
+          dataFilter:
+              DataFilter(a1Range: "CourseUsers!$columnLabelToUpdate$element"),
           values: [
             [""]
           ]);
@@ -120,7 +117,6 @@ class GoogleSheetService implements IGoogleSheetService {
             data: dataToSend, valueInputOption: 'USER_ENTERED');
 
     bool result = await googleSheetProvider.updateCellUser(sendToProvider);
-    print(result);
     return result;
   }
 
