@@ -66,8 +66,8 @@ class GoogleSheetService implements IGoogleSheetService {
     print(indexUser);
 
     if (indexUser == -1) {
-      columnLabel = "${getColumnLabel(rows.length + 1)}1";
-      addUserEmail(userEmail, columnLabel);
+      columnLabel = getColumnLabel(rows.length + 1);
+      addUserEmail(userEmail, "${columnLabel}1");
     } else {
       columnLabel = getColumnLabel(indexUser + 1);
       listColumn = List<String>.from(mapData["values"][indexUser]);

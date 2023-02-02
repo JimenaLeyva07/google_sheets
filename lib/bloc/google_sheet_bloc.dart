@@ -42,6 +42,9 @@ class GoogleSheetBloc {
         uncheckedList.remove(index);
       }
     }
+
+    print(checkedCourses);
+    print(uncheckedList);
   }
 
   Future<void> saveCoursesGsheets() async {
